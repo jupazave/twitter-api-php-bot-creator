@@ -8,3 +8,4 @@ Set up what the bot is gonna tweet.
 
 Simply.
 
+Source code from the @nyancatbot
