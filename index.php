@@ -1,37 +1,41 @@
 <?php
-ini_set('display_errors', 1);
-require_once('TwitterAPIExchange.php');
+    ini_set('display_errors', 1);
+    require_once('TwitterAPIExchange.php');
 
-/** Set access tokens here - see: https://dev.twitter.com/apps/ **/
-$settings = array(
-    'oauth_access_token' => "",
-    'oauth_access_token_secret' => "",
-    'consumer_key' => "",
-    'consumer_secret' => ""
-);
+    include_once('config.php');
 
-/** URL for REST request, see: https://dev.twitter.com/docs/api/1.1/ **/
-$url = 'https://api.twitter.com/1.1/blocks/create.json';
-$requestMethod = 'POST';
+    $url = 'https://api.twitter.com/1.1/search/tweets.json';
+    $getfield = '?q=' . $config['twitter_search' ] . '&count=1';
+    $requestMethod = 'GET';
 
-/** POST fields required by the URL above. See relevant docs as above **/
-$postfields = array(
-    'screen_name' => 'usernameToBlock', 
-    'skip_status' => '1'
-);
+    $twitter = new TwitterAPIExchange($config['settings']);
+    $response = $twitter->setGetfield($getfield)
+                        ->buildOauth($url, $requestMethod)
+                        ->performRequest();
 
-/** Perform a POST request and echo the response **/
-$twitter = new TwitterAPIExchange($settings);
-echo $twitter->buildOauth($url, $requestMethod)
-             ->setPostfields($postfields)
-             ->performRequest();
+    $obj = json_decode($response, true);
+    $tweet_id = $obj['statuses'][0]['id'];
+    $tweet_screen_name = $obj['statuses'][0]['user']['screen_name'];
+    $tweet_name = $obj['statuses'][0]['user']['name'];
 
-/** Perform a GET request and echo the response **/
-/** Note: Set the GET field BEFORE calling buildOauth(); **/
-$url = 'https://api.twitter.com/1.1/followers/ids.json';
-$getfield = '?screen_name=J7mbo';
-$requestMethod = 'GET';
-$twitter = new TwitterAPIExchange($settings);
-echo $twitter->setGetfield($getfield)
-             ->buildOauth($url, $requestMethod)
-             ->performRequest();
+    $rand = array_rand($config['text_strings'], 1);
+
+    $status = "@" . $tweet_screen_name . " Hey " . $tweet_name . $config['text_strings'][$rand];
+
+    $url = 'https://api.twitter.com/1.1/statuses/update.json';
+    $requestMethod = 'POST';
+
+    $postFields =  array(
+        'status' => $status,
+        'in_reply_to_status_id' => $tweet_id
+        );
+
+    $twitter = new TwitterAPIExchange($config['settings']);
+    $response = $twitter->buildOauth($url, $requestMethod)
+    ->setPostfields($postFields)
+    ->performRequest();
+
+    $obj = json_decode($response, true);
+    $tweet_id = $obj['statuses'][0]['id'];
+    $tweet_screen_name = $obj['statuses'][0]['user']['screen_name'];
+    $tweet_name = $obj['statuses'][0]['user']['name'];
