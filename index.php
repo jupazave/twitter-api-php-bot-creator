@@ -20,7 +20,7 @@
 
     $rand = array_rand($config['text_strings'], 1);
 
-    $status = "@" . $tweet_screen_name . " Hey " . $tweet_name . $config['text_strings'][$rand];
+    $status = "@" . $tweet_screen_name . " Hey " . $tweet_name . " " . $config['text_strings'][$rand];
 
     $url = 'https://api.twitter.com/1.1/statuses/update.json';
     $requestMethod = 'POST';
